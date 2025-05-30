@@ -20,8 +20,13 @@ Example usage:
 python3 btcrecover.py --wallet wallet.dat \
     --db-uri postgresql://user:pass@localhost/dbname \
     --db-batch-size 500 \
-    --db-expire-hours 12
+    --db-expire-hours 12 \
+    --nointernet
 ```
+
+The `--nointernet` option blocks all network access except for connections to
+the database specified by `--db-uri`. Use it when the recovery machines should
+remain isolated from the Internet.
 
 Each fetched password is marked `in_progress`. After testing, entries are updated to `tested`. When a correct password is found the row is marked `found`.
 

@@ -117,6 +117,7 @@ If you need help, [your best bet is to look at my BTCRecover playlist on YouTube
  * Multithreaded searches, with user-selectable thread count
  * Ability to spread search workload over multiple devices
  * [PostgreSQL password queue](docs/db_queue.md) support (`--db-uri`, `--db-batch-size`)
+ * Optional `--nointernet` flag to disable all network access except the database
  * [GPU acceleration](docs/GPU_Acceleration.md) for Bitcoin Core Passwords, Blockchain.com (Main and Second Password), Electrum Passwords + BIP39 and Electrum Seeds
  * Wildcard expansion for passwords
  * Typo simulation for passwords and seeds

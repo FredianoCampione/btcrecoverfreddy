@@ -5896,6 +5896,7 @@ def init_parser_common():
         parser_common.add_argument("--db-uri", metavar="URI", help="PostgreSQL URI for password queue")
         parser_common.add_argument("--db-batch-size", type=int, default=1000, metavar="COUNT", help="batch size when fetching passwords from --db-uri")
         parser_common.add_argument("--db-expire-hours", type=int, metavar="HOURS", help="reset stale in_progress rows older than HOURS before starting")
+        parser_common.add_argument("--nointernet", action="store_true", help="block all network access except to the --db-uri host")
         parser_common.add_argument("--version","-v",action="store_true", help="show full version information and exit")
         parser_common.add_argument("--disablesecuritywarnings", "--dsw", action="store_true", help="Disable Security Warning Messages")
         dump_group = parser_common.add_argument_group("Wallet Decryption and Key Dumping")
@@ -6082,6 +6083,12 @@ def parse_arguments(effective_argv, wallet = None, base_iterator = None,
         pass
     #
     args = parser.parse_args(effective_argv)
+
+    if args.nointernet:
+        if not args.db_uri:
+            error_exit("--nointernet requires --db-uri")
+        from utilities.no_internet import restrict_network
+        restrict_network(args.db_uri)
 
     # Do this as early as possible so user doesn't miss any error messages
     if args.pause: enable_pause()
