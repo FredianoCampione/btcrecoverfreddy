@@ -15,7 +15,8 @@ multiple machines or when you want to pre-process lists before running
 python scripts/create_password_db.py --db-uri postgresql://USER:PASS@HOST/DBNAME
 ```
 
-This will create a table named `passwords` with a `pending` status column.
+This will create a table named `password_queue` with columns for the password,
+its `status` (initially `pending`), the worker that claimed it, and a timestamp.
 
 ## Loading Passwords
 

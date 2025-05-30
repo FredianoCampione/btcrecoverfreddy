@@ -13,7 +13,7 @@ def insert_passwords(conn, passwords, batch_size=1000):
             batch = [(p,) for p in passwords[i:i+batch_size]]
             execute_values(
                 cur,
-                "INSERT INTO passwords(password) VALUES %s ON CONFLICT DO NOTHING",
+                "INSERT INTO password_queue(password) VALUES %s ON CONFLICT DO NOTHING",
                 batch,
             )
     conn.commit()
