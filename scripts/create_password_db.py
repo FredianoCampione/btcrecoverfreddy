@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Create PostgreSQL password database."""
+"""Create the PostgreSQL `password_queue` table."""
 
 import argparse
 import sys
@@ -10,11 +10,11 @@ def create_table(conn):
     with conn.cursor() as cur:
         cur.execute(
             """
-            CREATE TABLE IF NOT EXISTS passwords (
-                id SERIAL PRIMARY KEY,
-                password TEXT UNIQUE,
+            CREATE TABLE IF NOT EXISTS password_queue (
+                password TEXT PRIMARY KEY,
                 status TEXT NOT NULL DEFAULT 'pending',
-                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                claimed_by TEXT,
+                timestamp TIMESTAMPTZ DEFAULT NOW()
             )
             """
         )
