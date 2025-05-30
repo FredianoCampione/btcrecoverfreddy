@@ -47,22 +47,19 @@ if __name__ == "__main__":
             print("LTC: M966MQte7agAzdCZe5ssHo7g9VriwXgyqM ")
             print("ETH: 0x72343f2806428dbbc2C11a83A1844912184b4243 ")
 
-            # Selective Donation Addressess depending on path being recovered... (To avoid spamming the dialogue with shitcoins...)
-            # TODO: Implement this better with a dictionary mapping in seperate PY file with BTCRecover specific donation addys... (Seperate from YY Channel)
-            if path_coin == 28:
-                print("VTC: vtc1qxauv20r2ux2vttrjmm9eylshl508q04uju936n ")
+            # Selective Donation Addresses depending on the path being recovered
+            # (To avoid spamming the dialogue with many addresses)
+            DONATION_ADDRESSES = {
+                28: "VTC: vtc1qxauv20r2ux2vttrjmm9eylshl508q04uju936n",
+                22: "MONA: mona1q504vpcuyrrgr87l4cjnal74a4qazes2g9qy8mv",
+                5:  "DASH: Xx2umk6tx25uCWp6XeaD5f7CyARkbemsZG",
+                121: "ZEN: znUihTHfwm5UJS1ywo911mdNEzd9WY9vBP7",
+                3:  "DOGE: DMQ6uuLAtNoe5y6DCpxk2Hy83nYSPDwb5T",
+            }
 
-            if path_coin == 22:
-                print("MONA: mona1q504vpcuyrrgr87l4cjnal74a4qazes2g9qy8mv ")
-
-            if path_coin == 5:
-                print("DASH: Xx2umk6tx25uCWp6XeaD5f7CyARkbemsZG ")
-
-            if path_coin == 121:
-                print("ZEN: znUihTHfwm5UJS1ywo911mdNEzd9WY9vBP7 ")
-
-            if path_coin == 3:
-                print("DOGE: DMQ6uuLAtNoe5y6DCpxk2Hy83nYSPDwb5T ")
+            address = DONATION_ADDRESSES.get(path_coin)
+            if address:
+                print(address + " ")
 
             print()
             print("Find me on Reddit @ https://www.reddit.com/user/Crypto-Guide")
