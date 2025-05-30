@@ -36,3 +36,7 @@ cat biglist.txt | python scripts/add_passwords.py --db-uri postgresql://... --ba
 
 All inserted rows will have their `status` set to `pending`.
 
+To automatically retry jobs that were claimed but never completed, use the
+`--db-expire-hours` option when running `btcrecover` or call
+`DBQueue.reset_expired()` from your own scripts.
+

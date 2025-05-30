@@ -19,7 +19,20 @@ Example usage:
 ```
 python3 btcrecover.py --wallet wallet.dat \
     --db-uri postgresql://user:pass@localhost/dbname \
-    --db-batch-size 500
+    --db-batch-size 500 \
+    --db-expire-hours 12
 ```
 
 Each fetched password is marked `in_progress`. After testing, entries are updated to `tested`. When a correct password is found the row is marked `found`.
+
+## Requeuing stale rows
+
+Use `--db-expire-hours` to reset any `in_progress` rows whose timestamp is older
+than the specified number of hours. BTCRecover performs this cleanup when it
+starts so that stale entries from crashed workers are retried.
+
+You can also run the cleanup manually from a scheduled task:
+
+```
+python3 -c "from utilities.db_queue import DBQueue; DBQueue('postgresql://user:pass@localhost/dbname').reset_expired(24)"
+```

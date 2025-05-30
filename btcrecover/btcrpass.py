@@ -5895,6 +5895,7 @@ def init_parser_common():
         parser_common.add_argument("--disable-save-possible-passwords",       action="store_true", help="Disable saving possible matches to file")
         parser_common.add_argument("--db-uri", metavar="URI", help="PostgreSQL URI for password queue")
         parser_common.add_argument("--db-batch-size", type=int, default=1000, metavar="COUNT", help="batch size when fetching passwords from --db-uri")
+        parser_common.add_argument("--db-expire-hours", type=int, metavar="HOURS", help="reset stale in_progress rows older than HOURS before starting")
         parser_common.add_argument("--version","-v",action="store_true", help="show full version information and exit")
         parser_common.add_argument("--disablesecuritywarnings", "--dsw", action="store_true", help="Disable Security Warning Messages")
         dump_group = parser_common.add_argument_group("Wallet Decryption and Key Dumping")
@@ -7069,6 +7070,8 @@ def parse_arguments(effective_argv, wallet = None, base_iterator = None,
     if args.db_uri:
         global db_queue
         db_queue = DBQueue(args.db_uri, args.db_batch_size)
+        if args.db_expire_hours:
+            db_queue.reset_expired(args.db_expire_hours)
         base_password_generator = db_password_generator
         has_any_wildcards = False
         args.no_eta = True

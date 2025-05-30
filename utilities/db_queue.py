@@ -65,6 +65,24 @@ class DBQueue:
             )
             self.conn.commit()
 
+    def reset_expired(self, expire_hours):
+        """Reset in_progress rows older than the given number of hours."""
+        if not expire_hours:
+            return 0
+        with self.conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE password_queue
+                   SET status='pending', claimed_by=NULL, timestamp=NOW()
+                 WHERE status='in_progress'
+                   AND timestamp < NOW() - INTERVAL %s
+                """,
+                (f"{expire_hours} hours",),
+            )
+            count = cur.rowcount
+        self.conn.commit()
+        return count
+
     def close(self):
         self.conn.close()
 
