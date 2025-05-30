@@ -25,6 +25,8 @@
 __version__          =  "1.13.0-Cryptoguide"
 __ordering_version__ = b"0.6.4"  # must be updated whenever password ordering changes
 disable_security_warnings = True
+db_queue = None
+db_pending_batches = []
 
 # Import modules included in standard libraries
 import sys, argparse, itertools, string, re, multiprocessing, signal, os, pickle, gc, \
@@ -35,6 +37,7 @@ import btcrecover.opencl_helpers
 import lib.cardano.cardano_utils as cardano
 from lib.eth_hash.auto import keccak
 from lib.mnemonic_btc_com_tweaked import Mnemonic
+from utilities.db_queue import DBQueue
 
 module_leveldb_available = False
 try:
@@ -5890,6 +5893,8 @@ def init_parser_common():
         parser_common.add_argument("--pause",       action="store_true", help="pause before exiting")
         parser_common.add_argument("--possible-passwords-file", metavar="FILE", default = "possible_passwords.log", help="Specify the file to save possible close matches to. (Defaults to possible_passwords.log)")
         parser_common.add_argument("--disable-save-possible-passwords",       action="store_true", help="Disable saving possible matches to file")
+        parser_common.add_argument("--db-uri", metavar="URI", help="PostgreSQL URI for password queue")
+        parser_common.add_argument("--db-batch-size", type=int, default=1000, metavar="COUNT", help="batch size when fetching passwords from --db-uri")
         parser_common.add_argument("--version","-v",action="store_true", help="show full version information and exit")
         parser_common.add_argument("--disablesecuritywarnings", "--dsw", action="store_true", help="Disable Security Warning Messages")
         dump_group = parser_common.add_argument_group("Wallet Decryption and Key Dumping")
@@ -7061,6 +7066,13 @@ def parse_arguments(effective_argv, wallet = None, base_iterator = None,
         parse_tokenlist(tokenlist_file, tokenlist_first_line_num)
         base_password_generator = tokenlist_base_password_generator
 
+    if args.db_uri:
+        global db_queue
+        db_queue = DBQueue(args.db_uri, args.db_batch_size)
+        base_password_generator = db_password_generator
+        has_any_wildcards = False
+        args.no_eta = True
+
 
     # Open a new autosave file (if --restore was specified, the restore file
     # is still open and has already been assigned to autosave_file instead)
@@ -7711,6 +7723,8 @@ def password_generator(chunksize = 1, only_yield_count = False):
             else:
                 passwords_gathered.append(password)
                 if passwords_count >= chunksize:
+                    if args.db_uri:
+                        db_pending_batches.append(list(passwords_gathered))
                     new_args = yield passwords_gathered
                     passwords_gathered = []
                     passwords_count    = 0
@@ -7728,6 +7742,8 @@ def password_generator(chunksize = 1, only_yield_count = False):
 
     # Produce the remaining passwords that have been accumulated
     if passwords_count > 0:
+        if not only_yield_count and args.db_uri:
+            db_pending_batches.append(list(passwords_gathered))
         yield passwords_count if only_yield_count else passwords_gathered
 
 
@@ -8221,6 +8237,15 @@ def passwordlist_base_password_generator():
             passwordlist_file.close()
     except ValueError: #This exception will be thrown if we are reading a multi-file seedlist, as the file was closed earlier
         pass
+
+
+def db_password_generator():
+    while True:
+        batch = db_queue.fetch_batch()
+        if not batch:
+            return
+        for pw in batch:
+            yield pw
 
 
 
@@ -9284,6 +9309,7 @@ def main():
     if progress: progress.start()
     try:
         for password_found, passwords_tried_last in password_found_iterator:
+            batch = db_pending_batches.pop(0) if args.db_uri else None
             if password_found:
                 if pool:
                     # Close the pool, but don't wait for (join) processes to exit gracefully on
@@ -9294,12 +9320,17 @@ def main():
                     global _pool
                     _pool = pool
                 passwords_tried += passwords_tried_last - 1  # just before the found password
+                if args.db_uri:
+                    db_queue.mark_tested(batch)
+                    db_queue.mark_found(password_found)
                 if progress:
                     progress.next_update = 0  # force a screen update
                     progress.update(passwords_tried)
                     print()  # move down to the line below the progress bar
                 break
             passwords_tried += passwords_tried_last
+            if args.db_uri:
+                db_queue.mark_tested(batch)
             if progress:
                 if args.dynamic_passwords_count:
                     progress.maxval = current_passwords_count.value
