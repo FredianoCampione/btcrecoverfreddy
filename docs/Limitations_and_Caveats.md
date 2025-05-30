@@ -40,3 +40,20 @@ Most Bitcoin wallet software goes to great lengths to protect your wallet passwo
  * unless you use the `--no-dupchecks` option, a large amount of sensitive password information is stored in RAM temporarily, is not securely overwritten, and is very likely swapped out to the paging file where it could remain for a long time even after *btcrecover* has exited.
 
 None of these issues are intentionally malicious, they should be considered security bugs. There are no workarounds for them, short of only running *btcrecover* inside a VM on a hard disk drive (not a solid-state drive) and securely deleting the VM once finished, all of which is far beyond the scope of this tutorial...
+
+## Storing Passwords in a Centralized Database ##
+
+If you keep a list of candidate passwords in a database so that multiple
+systems can share it, that database becomes a single point of failure.
+To reduce the risks:
+
+ * Always use encrypted connections when reading or writing the password
+   data.
+ * Enforce strict access controls so that only the machines involved in
+   the recovery process can connect.
+ * Regularly purge any passwords that have already been tested.
+
+Because the candidate passphrases are stored as plaintext, an attacker who
+gains access to the database could compromise your wallet.  Take whatever
+measures you can to keep this information private and to remove it once
+it is no longer needed.
