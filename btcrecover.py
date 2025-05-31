@@ -100,8 +100,12 @@ if __name__ == "__main__":
                         except Exception as e:
                                 print("Failed to write found password:", e, file=sys.stderr)
                 if btcrpass.args.shutdown_after_found:
+
                         if btcrpass.args.disable_network:
                                 disable_network_interfaces()
+
+                        import os
+
                         cmd = "shutdown -h now" if os.name != "nt" else "shutdown /s /t 0"
                         os.system(cmd)
                 retval = 0

@@ -5899,7 +5899,9 @@ def init_parser_common():
         parser_common.add_argument("--nointernet", action="store_true", help="block all network access except to the --db-uri host")
         parser_common.add_argument("--found-save-file", metavar="FILE", help="write found password to FILE")
         parser_common.add_argument("--shutdown-after-found", action="store_true", help="shutdown the system after saving the password")
+
         parser_common.add_argument("--disable-network", action="store_true", help="disable all network interfaces before shutdown")
+
         parser_common.add_argument("--skip-db-found", action="store_true", help="don't mark found password in database")
         parser_common.add_argument("--version","-v",action="store_true", help="show full version information and exit")
         parser_common.add_argument("--disablesecuritywarnings", "--dsw", action="store_true", help="Disable Security Warning Messages")
