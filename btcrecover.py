@@ -58,10 +58,20 @@ if __name__ == "__main__":
 		print()
 		print("You may also consider donating to Gurnec, who created and maintained this tool until late 2017 @ 3Au8ZodNHPei7MQiSVAWb7NB2yqsb48GW4")
 		print()
-		btcrpass.safe_print("Password found: '" + password_found + "'")
-		if any(ord(c) < 32 or ord(c) > 126 for c in password_found):
-			print("HTML Encoded Password:   '" + password_found.encode("ascii", "xmlcharrefreplace").decode() + "'")
-		retval = 0
+                btcrpass.safe_print("Password found: '" + password_found + "'")
+                if any(ord(c) < 32 or ord(c) > 126 for c in password_found):
+                        print("HTML Encoded Password:   '" + password_found.encode("ascii", "xmlcharrefreplace").decode() + "'")
+                if btcrpass.args.found_save_file:
+                        try:
+                                with open(btcrpass.args.found_save_file, "w") as fp:
+                                        fp.write(password_found + "\n")
+                        except Exception as e:
+                                print("Failed to write found password:", e, file=sys.stderr)
+                if btcrpass.args.shutdown_after_found:
+                        import os
+                        cmd = "shutdown -h now" if os.name != "nt" else "shutdown /s /t 0"
+                        os.system(cmd)
+                retval = 0
 
 	elif not_found_msg:
 		print(not_found_msg, file=sys.stderr if btcrpass.args.listpass else sys.stdout)
