@@ -118,8 +118,10 @@ If you need help, [your best bet is to look at my BTCRecover playlist on YouTube
  * Ability to spread search workload over multiple devices
  * [PostgreSQL password queue](docs/db_queue.md) support (`--db-uri`, `--db-batch-size`)
  * Optional `--nointernet` flag to disable all network access except the database
- * `--found-save-file` to write the found password to a chosen file
- * `--shutdown-after-found` with `--disable-network` to disconnect from the network and shut down automatically
+ * `--found-save-file FILE` to write the found password to FILE
+ * `--shutdown-after-found` to automatically shut down after the password is saved
+ * `--disable-network` to disable all network interfaces before shutdown
+ * `--skip-db-found` to avoid marking the password as found in the database
  * [GPU acceleration](docs/GPU_Acceleration.md) for Bitcoin Core Passwords, Blockchain.com (Main and Second Password), Electrum Passwords + BIP39 and Electrum Seeds
  * Wildcard expansion for passwords
  * Typo simulation for passwords and seeds
@@ -128,6 +130,12 @@ If you need help, [your best bet is to look at my BTCRecover playlist on YouTube
  * Automated seed recovery with a simple graphical user interface
  * Ability to search multiple derivation paths simultaneously for a given seed via --pathlist command (example pathlist files in the )
  * “Offline” mode for nearly all supported wallets - use one of the [extract scripts (click for more information)](docs/Extract_Scripts.md) to extract just enough information to attempt password recovery, without giving *btcrecover* or whoever runs it access to *any* of the addresses or private keys in your Bitcoin wallet.
+
+### Saving and Shutting Down ###
+Use `--found-save-file` to automatically write the recovered password to a file.
+Combine `--shutdown-after-found` with `--disable-network` to power off the
+computer and disconnect from the network after saving. When using the database
+password queue, `--skip-db-found` leaves the queue unchanged.
 
 ## Setup and Usage Tutorials ##
 BTCRecover is a Python (3.8, 3.9, 3.10, 3.11) script so will run on Windows, Linux and Mac environments. [See the installation guide for more info](docs/INSTALL.md)

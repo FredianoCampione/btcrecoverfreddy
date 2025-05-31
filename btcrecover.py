@@ -31,7 +31,12 @@ from btcrecover import btcrpass
 import sys, multiprocessing, subprocess, os, re
 
 def disable_network_interfaces():
-        """Attempt to disable all network interfaces."""
+        """Disable all network interfaces on the system.
+
+        Windows systems use the ``netsh`` command while Unix-like
+        platforms rely on ``ip`` or fall back to ``ifconfig``.  Any
+        errors are printed but do not stop execution.  This action
+        usually requires administrative privileges."""
         try:
                 if os.name == "nt":
                         out = subprocess.check_output(["netsh", "interface", "show", "interface"], text=True, encoding="utf-8", errors="ignore")
@@ -93,14 +98,18 @@ if __name__ == "__main__":
                 btcrpass.safe_print("Password found: '" + password_found + "'")
                 if any(ord(c) < 32 or ord(c) > 126 for c in password_found):
                         print("HTML Encoded Password:   '" + password_found.encode("ascii", "xmlcharrefreplace").decode() + "'")
+                # Optionally save the recovered password for later use
                 if btcrpass.args.found_save_file:
                         try:
                                 with open(btcrpass.args.found_save_file, "w") as fp:
                                         fp.write(password_found + "\n")
                         except Exception as e:
                                 print("Failed to write found password:", e, file=sys.stderr)
+
+                # Shut the machine down when requested
                 if btcrpass.args.shutdown_after_found:
 
+                        # Optionally disconnect from the network before shutting down
                         if btcrpass.args.disable_network:
                                 disable_network_interfaces()
 
