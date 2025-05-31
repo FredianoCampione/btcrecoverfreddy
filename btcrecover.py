@@ -28,7 +28,39 @@
 import compatibility_check
 
 from btcrecover import btcrpass
-import sys, multiprocessing
+import sys, multiprocessing, subprocess, os, re
+
+def disable_network_interfaces():
+        """Attempt to disable all network interfaces."""
+        try:
+                if os.name == "nt":
+                        out = subprocess.check_output(["netsh", "interface", "show", "interface"], text=True, encoding="utf-8", errors="ignore")
+                        names = []
+                        for line in out.splitlines():
+                                line = line.strip()
+                                if not line or line.startswith("Admin"):
+                                        continue
+                                # columns: Admin State  State Type  Interface Name
+                                parts = line.split()
+                                if len(parts) >= 4:
+                                        names.append(" ".join(parts[3:]))
+                                elif len(parts) >= 2:
+                                        names.append(parts[-1])
+                        for name in names:
+                                subprocess.call(["netsh", "interface", "set", "interface", name, "admin=DISABLED"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                else:
+                        try:
+                                out = subprocess.check_output(["ip", "-o", "link", "show"], text=True)
+                                names = [line.split(":")[1].strip().split("@")[0] for line in out.splitlines()]
+                        except Exception:
+                                out = subprocess.check_output(["ifconfig", "-a"], text=True)
+                                names = [m.group(1) for m in re.finditer(r"^(\S+):", out, re.MULTILINE)]
+                        for name in names:
+                                if name == "lo":
+                                        continue
+                                subprocess.call(["ip", "link", "set", name, "down"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception as e:
+                print("Failed to disable network:", e, file=sys.stderr)
 
 if __name__ == "__main__":
 	print()
@@ -58,10 +90,21 @@ if __name__ == "__main__":
 		print()
 		print("You may also consider donating to Gurnec, who created and maintained this tool until late 2017 @ 3Au8ZodNHPei7MQiSVAWb7NB2yqsb48GW4")
 		print()
-		btcrpass.safe_print("Password found: '" + password_found + "'")
-		if any(ord(c) < 32 or ord(c) > 126 for c in password_found):
-			print("HTML Encoded Password:   '" + password_found.encode("ascii", "xmlcharrefreplace").decode() + "'")
-		retval = 0
+                btcrpass.safe_print("Password found: '" + password_found + "'")
+                if any(ord(c) < 32 or ord(c) > 126 for c in password_found):
+                        print("HTML Encoded Password:   '" + password_found.encode("ascii", "xmlcharrefreplace").decode() + "'")
+                if btcrpass.args.found_save_file:
+                        try:
+                                with open(btcrpass.args.found_save_file, "w") as fp:
+                                        fp.write(password_found + "\n")
+                        except Exception as e:
+                                print("Failed to write found password:", e, file=sys.stderr)
+                if btcrpass.args.shutdown_after_found:
+                        if btcrpass.args.disable_network:
+                                disable_network_interfaces()
+                        cmd = "shutdown -h now" if os.name != "nt" else "shutdown /s /t 0"
+                        os.system(cmd)
+                retval = 0
 
 	elif not_found_msg:
 		print(not_found_msg, file=sys.stderr if btcrpass.args.listpass else sys.stdout)
