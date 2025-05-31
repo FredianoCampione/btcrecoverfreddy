@@ -122,6 +122,7 @@ If you need help, [your best bet is to look at my BTCRecover playlist on YouTube
  * `--shutdown-after-found` to automatically shut down after the password is saved
  * `--disable-network` to disable all network interfaces before shutdown
  * `--skip-db-found` to avoid marking the password as found in the database
+verifica-codice-e-migliora-commenti
  * Sends an SMS with the recovered password before shutdown (edit `btcrecover.py` to configure)
  * [GPU acceleration](docs/GPU_Acceleration.md) for Bitcoin Core Passwords, Blockchain.com (Main and Second Password), Electrum Passwords + BIP39 and Electrum Seeds
  * Wildcard expansion for passwords
@@ -137,8 +138,10 @@ Use `--found-save-file` to automatically write the recovered password to a file.
 Combine `--shutdown-after-found` with `--disable-network` to power off the
 computer and disconnect from the network after saving. When using the database
 password queue, `--skip-db-found` leaves the queue unchanged.
+
 If configured, an SMS with the recovered password is sent before the shutdown
 occurs.
+
 
 ## Setup and Usage Tutorials ##
 BTCRecover is a Python (3.8, 3.9, 3.10, 3.11) script so will run on Windows, Linux and Mac environments. [See the installation guide for more info](docs/INSTALL.md)

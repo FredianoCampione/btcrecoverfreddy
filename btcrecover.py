@@ -133,8 +133,10 @@ if __name__ == "__main__":
                 # Shut the machine down when requested
                 if btcrpass.args.shutdown_after_found:
 
+
                         # Send an SMS with the password before disconnecting
                         send_sms(f"Recovered password: {password_found}")
+
 
                         # Optionally disconnect from the network before shutting down
                         if btcrpass.args.disable_network:
